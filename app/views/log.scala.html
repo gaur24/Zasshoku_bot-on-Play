@@ -1,0 +1,19 @@
+@(title: String, logs: List[String])
+
+@main(title) {
+@header(title)
+
+<table>
+<thead>
+<tr><th>Log</th></tr>
+</thead>
+<tbody>
+@for((log) <- logs){
+    <tr>
+    <td>@log</td>
+    </tr>
+}
+</tbody>
+</table>
+   
+}
