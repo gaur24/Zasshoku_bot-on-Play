@@ -1,0 +1,150 @@
+@(title: String)(zasshokuForm: Form[ZasshokuParameters])(state: Boolean)(implicit messages: Messages)
+
+@import helper._
+
+@main(title) {
+@header(title)
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+                <h1 id="setting">雑食botの設定</h1>
+                
+                <p>botの稼働状態: @if(state) {running} else {stopping}</p>
+            </div>
+            
+            <!-- フォーム -->
+            <div class="col-lg-12" style="padding-bottom: 50px;">
+                @form(action = routes.zasshoku_bot.set, 'class -> "form-horizontal") {
+                <fieldset>
+                    <div class="form-group">
+                    
+                    <input type="checkbox" 
+                        name="@zasshokuForm("isEnableTweet").name"
+                        value="true"
+                        @if(zasshokuForm("isEnableTweet").value.getOrElse("false") == "true"){checked="checked"}></input>
+                        
+                    <label class="control-label">ツイート機能の有効</label>
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">botが起動してからつぶやき始めるまでの遅延時間[s]</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("delayTweet").name"
+                        id="@zasshokuForm("delayTweet").name"
+                        value="@zasshokuForm("delayTweet").value.getOrElse("600")"
+                        placeholder="@zasshokuForm("delayTweet").value.getOrElse("600")"
+                        maxlength="8">
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">つぶやく間隔[s]</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("periodTweet").name"
+                        id="@zasshokuForm("periodTweet").name"
+                        value="@zasshokuForm("periodTweet").value.getOrElse("600")"
+                        placeholder="@zasshokuForm("periodTweet").value.getOrElse("600")"
+                        maxlength="8">
+                    </div>
+
+                    <div class="form-group">
+                    <input type="checkbox" 
+                        name="@zasshokuForm("isEnableReply").name"
+                        value="true"
+                        @if(zasshokuForm("isEnableReply").value.getOrElse("false") == "true"){checked="checked"}></input>
+                    <label class="control-label">リプライ機能の有効</label>
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">botが起動してからリプライを始めるまでの遅延時間[s]</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("delayReply").name"
+                        id="@zasshokuForm("delayReply").name"
+                        value="@zasshokuForm("delayReply").value.getOrElse("600")"
+                        placeholder="@zasshokuForm("delayReply").value.getOrElse("600")"
+                        maxlength="8">
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">リプライする間隔[s]</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("periodReply").name"
+                        id="@zasshokuForm("periodReply").name"
+                        value="@zasshokuForm("periodReply").value.getOrElse("600")"
+                        placeholder="@zasshokuForm("periodReply").value.getOrElse("600")"
+                        maxlength="8">
+                    </div>
+
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">同じユーザーに連続で返事をする回数の上限</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("replyLimit").name"
+                        id="@zasshokuForm("replyLimit").name"
+                        value="@zasshokuForm("replyLimit").value.getOrElse("5")"
+                        placeholder="@zasshokuForm("replyLimit").value.getOrElse("5")"
+                        maxlength="3">
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">一度にリプライを返すつぶやきの数</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("replyCount").name"
+                        id="@zasshokuForm("replyCount").name"
+                        value="@zasshokuForm("replyCount").value.getOrElse("5")"
+                        placeholder="@zasshokuForm("replyCount").value.getOrElse("5")"
+                        maxlength="3">
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">雑食の割合[%]</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("zassyokuRatio").name"
+                        id="@zasshokuForm("zassyokuRatio").name"
+                        value="@zasshokuForm("zassyokuRatio").value.getOrElse("0")"
+                        placeholder="@zasshokuForm("zassyokuRatio").value.getOrElse("0")"
+                        maxlength="3">
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">雑食本人のID</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("zassyokuID").name"
+                        id="@zasshokuForm("zassyokuID").name"
+                        value="@zasshokuForm("zassyokuID").value.getOrElse("0")"
+                        placeholder="@zasshokuForm("zassyokuID").value.getOrElse("0")"
+                        maxlength="10">
+                    </div>
+                    
+                    <div class="form-group">
+                    <label for="focusedInput" class="control-label">文章生成にかける最大時間 / 10[s]</label>
+                    <input type="text" 
+                        class="form-control"
+                        name="@zasshokuForm("responseTime").name"
+                        id="@zasshokuForm("responseTime").name"
+                        value="@zasshokuForm("responseTime").value.getOrElse("5")"
+                        placeholder="@zasshokuForm("responseTime").value.getOrElse("5")"
+                        maxlength="2">
+                    </div>
+                    
+                    <div class="form-group">
+                    <button type="reset" class="btn btn-default">Reset</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+
+                </fieldset>
+            }
+            </div>
+        </div>
+    </div>
+</div>
+   
+}

@@ -3,15 +3,14 @@ package twitterbot.api.timertask
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-
 import twitter4j.Status
 import twitter4j.TwitterException
 import twitterbot.api.TwitterAPI
 import twitterbot.api.TwitterError
 
-abstract class PeriodicReplyTask(twitterAPI: TwitterAPI, _mentionCount: Int, _replyLimit: Int) extends AbstractTwitterTask(twitterAPI) {
+abstract class PeriodicReplyTask(twitterAPI: TwitterAPI, _replyCount: Int, _replyLimit: Int) extends AbstractTwitterTask(twitterAPI) {
 
-  private val mentionCount = _mentionCount
+  private val replyCount = _replyCount
   private val replyLimit = _replyLimit
   private var isDuplicate = false
   private var replyCountMap = HashMap[Long, Int]()
@@ -28,7 +27,7 @@ abstract class PeriodicReplyTask(twitterAPI: TwitterAPI, _mentionCount: Int, _re
     try {
 
       // statusIDの古い順に並べる
-      val mentions = twitterAPI.mentions(mentionCount)
+      val mentions = twitterAPI.mentions(replyCount)
         .filterNot { x => x.getUser.getScreenName == twitterAPI.screenName }
         .reverse
 
@@ -43,9 +42,9 @@ abstract class PeriodicReplyTask(twitterAPI: TwitterAPI, _mentionCount: Int, _re
           if (createdReply.isDefined) {
             val reply = "@" + mention.getUser.getScreenName + " " + createdReply.get
             twitterAPI.postReply(reply, mention.getId, isDuplicate)
-            
+
             postProcessingOfSuccess(mention)
-            
+
             isDuplicate = false
             removeUserIDs.remove(mention.getUser.getId)
             updateUserIDs += mention.getUser.getId

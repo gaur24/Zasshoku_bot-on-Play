@@ -8,6 +8,9 @@ import java.util.List
 import java.util.ArrayList
 import java.util.Arrays
 
+/**
+ * TwitterAPIで使用するパラメータの更新を行います
+ */
 class TwitterUpdator(_pNotFollow: Path, _pNotUnfollow: Path, _pLastReply: Path, _pLastTimeline: Path) {
   private val pNotFollowUserIDs = _pNotFollow
   private val pNotUnfollowUserIDs = _pNotUnfollow
@@ -64,5 +67,4 @@ object TwitterUpdator {
   private def readLongs(path: Path): List[Long] = {
     Files.readAllLines(path).seq.map { x => x.toLong }
   }
-
 }

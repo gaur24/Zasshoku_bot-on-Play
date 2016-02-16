@@ -1,53 +1,60 @@
 package twitterbot.zasshokubot
 
 import java.util.Timer
-import twitterbot.api.BotFactory
-import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.HashMap
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
-import scala.collection.JavaConverters._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import org.slf4j.LoggerFactory
+import twitterbot.api.TwitterAPI
+import twitterbot.api.MyLogger
 
-object ZasshokuBot {
+class ZasshokuBot(_botName: String, _twitterAPI: TwitterAPI, _userManager: ZasshokuUserManager) {
+  val botName = _botName
+  private val twitterAPI = _twitterAPI
+  private val userManager = _userManager
+
   private var isRunning = false
-  private var botName = "zasshoku_bot"
-  private val zassyokuID = 175335014L
-  val usersPath = Paths.get(botName, "users.dat")
   private var timer = new Timer
-  private var twitterAPI = BotFactory.createTwitterAPI(botName)
+  private val logger = LoggerFactory.getLogger(getClass)
+  
+  /**
+   * botの稼働状態を通知
+   */
+  def state(): Boolean = {
+    isRunning
+  }
 
-  var users = HashMap[Long, ZasshokuUser]()
-
-  def stop() {
+  /**
+   * botを停止します
+   */
+  def stop(): Unit = {
     if (isRunning) {
       timer.cancel()
       isRunning = false
+      logger.info("stop " + botName)
     }
   }
 
-  def start() {
-    if (!isRunning) {
-      timer.cancel()
-      timer = new Timer
-      timer.schedule(new ZasshokuTweet(twitterAPI, zassyokuID, 0), 1000, 100000)
-      timer.schedule(new ZasshokuReply(twitterAPI, 5, 3, zassyokuID, 0), 30000, 100000)
-      isRunning = true
-      println("start " + botName)
+  /**
+   * botを開始します
+   */
+  def start(): Unit = {
+    try {
+      if (!isRunning) {
+        timer.cancel()
+        timer = ZasshokuBotFactory.createNewTimer(botName, twitterAPI, userManager)
+        isRunning = true
+        logger.info("start " + botName)
+      }
+    } catch {
+      case t: Throwable =>
+        timer.cancel()
+        isRunning = false
+        logger.error(MyLogger.reduceMessage(t))
     }
   }
 
-  def writeZasshokuUsers() = {
-    val jsons = users.values.map { x => Json.toJson(x).toString() }.toList
-    Files.write(usersPath, jsons.asJava)
-  }
-
-  def readZasshokuUsers() = {
-    Files.readAllLines(usersPath).asScala
-      .map { x => Json.parse(x).validate[ZasshokuUser] }.toList
+  def users(): Seq[ZasshokuUser] = {
+    userManager.getUsers
   }
 }
+
+
 

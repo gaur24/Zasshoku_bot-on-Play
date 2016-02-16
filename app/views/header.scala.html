@@ -1,2 +1,26 @@
-@(header: String)
-@header
+@(title: String)
+
+<header>
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a href="/zasshoku_bot/" class="navbar-brand">@title</a>
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+
+            <div class="navbar-collapse collapse" id="navbar-main">
+                <ul class="nav navbar-nav">
+                    <li><a href="/zasshoku_bot/zasshoku_ranking">Ranking</a></li>
+                    <li><a href="/zasshoku_bot/log">Log</a></li>
+                    <li><a href="/zasshoku_bot/start">Start bot</a></li>
+                    <li><a href="/zasshoku_bot/stop">Stop bot</a></li> 
+                    <li><a href="/zasshoku_bot/setting">Setting</a></li>                   
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>

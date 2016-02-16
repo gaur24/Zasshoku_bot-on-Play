@@ -9,7 +9,7 @@ object MarkovController {
   private val regexRT = "RT[ ]@\\w+:[ ]"
   private val regexHashTag = "#\\S+[　\\s]"
 
-  def generateSentence(timeline: Seq[Status], myScreenName: String): Option[String] = {
+  def generateSentence(timeline: Seq[Status], myScreenName: String, sentenceLimit: Int, responseTime: Long): Option[String] = {
     val textList = timeline
       .filterNot { x => x.getText.contains("http") }
       .filterNot { x => x.getUser.getScreenName == myScreenName }
@@ -23,7 +23,7 @@ object MarkovController {
       .toList
     
     List.range(0, 10).par.map { x => 
-      this.generateSentenceByThread(textList, 3, TwitterAPI.tweetLengthMax, 5000)
+      this.generateSentenceByThread(textList, 3, sentenceLimit, responseTime)
       }
       .filterNot { x => x == null }
       .filterNot { x => x.isEmpty() }

@@ -1,0 +1,7 @@
+body { padding-top: 80px; }
+@media ( min-width: 768px ) {
+    #banner {
+        min-height: 300px;
+        border-bottom: none;
+    }
+}

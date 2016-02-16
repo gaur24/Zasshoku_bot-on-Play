@@ -5,6 +5,7 @@ import twitter4j.TwitterException
 import org.slf4j.LoggerFactory
 import twitterbot.api.TwitterAPI
 import twitterbot.api.TwitterError
+import twitterbot.api.MyLogger
 
 abstract class AbstractTwitterTask(_twitterAPI: TwitterAPI) extends TimerTask {
 
@@ -14,35 +15,28 @@ abstract class AbstractTwitterTask(_twitterAPI: TwitterAPI) extends TimerTask {
 
   def periodic()
 
-  def reduceMessage(message: String, stackTrace: Array[StackTraceElement]): String = {
-    message + System.lineSeparator + stackTrace.map(_.toString)
-      .reduceLeft(_ + System.lineSeparator + _)
-  }
-
   override def run() = {
     try {
       periodic()
     } catch {
       case e: TwitterException =>
         if (e.isCausedByNetworkIssue()) {
-          logger.error(reduceMessage("isCausedByNetworkIssue", e.getStackTrace))
+          logger.error(MyLogger.reduceMessage("isCausedByNetworkIssue", e))
         } else {
           
           e.getErrorCode match {
             case TwitterError.duplicateStatus =>
-              logger.error(reduceMessage("duplicateStatus", e.getStackTrace))
+              logger.error(MyLogger.reduceMessage("duplicateStatus", e))
             case TwitterError.couldNotFollowByAlreadyRequested =>
-              logger.error(reduceMessage("couldNotFollowByAlreadyRequested", e.getStackTrace))
+              logger.error(MyLogger.reduceMessage("couldNotFollowByAlreadyRequested", e))
             case TwitterError.statusOver140Characters =>
-              logger.error(reduceMessage("statusOver140Characters", e.getStackTrace))
+              logger.error(MyLogger.reduceMessage("statusOver140Characters", e))
             case _ =>
-              logger.error(reduceMessage(e.getMessage, e.getStackTrace))
+              logger.error(MyLogger.reduceMessage(e))
           }
         }
-      case e: Exception =>
-        logger.error(reduceMessage(e.getMessage, e.getStackTrace))
-      case e: Throwable =>
-        logger.error(reduceMessage(e.getMessage, e.getStackTrace))
+      case t: Throwable =>
+        logger.error(MyLogger.reduceMessage(t))
     }
   }
 }

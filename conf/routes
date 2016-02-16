@@ -13,3 +13,5 @@ GET     /zasshoku_bot/zasshoku_ranking           controllers.zasshoku_bot.zassho
 GET     /zasshoku_bot/log                        controllers.zasshoku_bot.log
 GET     /zasshoku_bot/stop                       controllers.zasshoku_bot.stop
 GET     /zasshoku_bot/start                      controllers.zasshoku_bot.start
+GET     /zasshoku_bot/setting                    controllers.zasshoku_bot.setting
+POST    /zasshoku_bot/setting                    controllers.zasshoku_bot.set

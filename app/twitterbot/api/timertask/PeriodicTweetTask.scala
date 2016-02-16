@@ -8,6 +8,6 @@ abstract class PeriodicTweetTask(twitterAPI: TwitterAPI) extends AbstractTwitter
 
   override def periodic() = {
     val tweet = makeTweet()
-    if (tweet.isDefined) twitterAPI.postTweet(tweet.get)
+    if (tweet.isDefined) twitterAPI.postTweet(tweet.get.slice(0, TwitterAPI.tweetLengthMax))
   }
 }
