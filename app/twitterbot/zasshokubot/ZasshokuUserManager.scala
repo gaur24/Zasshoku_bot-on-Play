@@ -16,7 +16,7 @@ class ZasshokuUserManager(_usersPath: Path) {
   }
   
   def update(user: ZasshokuUser) = {
-    users = users.filterNot(_.userID == user.userID) += (user)
+    users = users.filterNot(_.userID == user.userID) += user
     this.writeZasshokuUsers
   }
   
@@ -28,8 +28,8 @@ class ZasshokuUserManager(_usersPath: Path) {
    * ユーザー情報をJSON形式で書き出します
    */
   def writeZasshokuUsers() = {
-    val jsons = users.map(Json.toJson(_).toString).toList
-    Files.write(usersPath, jsons.asJava)
+    val csvs = users.map(_.toCSV()).toList
+    Files.write(usersPath, csvs.asJava)
   }
 
   /**
@@ -37,6 +37,7 @@ class ZasshokuUserManager(_usersPath: Path) {
    */
   def readZasshokuUsers(): Seq[ZasshokuUser] = {
     Files.readAllLines(usersPath).asScala
-      .map { x => Json.parse(x).validate[ZasshokuUser].get }.toSeq
+      .filterNot(_.isEmpty)
+      .map(ZasshokuUser.parseCSV(_)).toSeq
   }
 }

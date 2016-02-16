@@ -30,9 +30,6 @@ class ZasshokuTweet(twitterAPI: TwitterAPI, _zassyokuID: Long, _zassyokuRatio: I
     if (tweet.isDefined && tweet.get.length > limit) {
       tweet = Some(tweet.get.slice(0, limit) + "文字数")
     }
-    if(tweet.isDefined){
-      println("つぶやき文字数" + tweet.get.length)
-    }
     tweet
   }
 }

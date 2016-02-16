@@ -76,7 +76,6 @@ class zasshoku_bot @Inject() (val messagesApi: MessagesApi) extends Controller w
           ZasshokuBotFactory.updateProperties(botName, success)
           logger.info("setting success!")
           zasshokuBot.stop()
-          zasshokuBot.start()
           Redirect(routes.zasshoku_bot.setting)
 
         })

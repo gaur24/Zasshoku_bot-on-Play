@@ -31,6 +31,8 @@ abstract class AbstractTwitterTask(_twitterAPI: TwitterAPI) extends TimerTask {
               logger.error(MyLogger.reduceMessage("couldNotFollowByAlreadyRequested", e))
             case TwitterError.statusOver140Characters =>
               logger.error(MyLogger.reduceMessage("statusOver140Characters", e))
+            case TwitterError.rateLimitExceeded =>
+              logger.error(MyLogger.reduceMessage("rateLimitExceeded", e))
             case _ =>
               logger.error(MyLogger.reduceMessage(e))
           }

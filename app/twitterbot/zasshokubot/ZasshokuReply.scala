@@ -54,8 +54,8 @@ class ZasshokuReply(twitterAPI: TwitterAPI, _zassyokuID: Long, _zassyokuRatio: I
     
     val optionUser = userManager.find(mention.getUser.getId)
 
-    val user = if (optionUser.isDefined) {
-      val existUser = optionUser.get
+    var user = if (optionUser.isDefined) {
+      var existUser = optionUser.get
       existUser.screenName = mention.getUser.getScreenName
       existUser.isProtected = mention.getUser.isProtected
       existUser
@@ -64,11 +64,11 @@ class ZasshokuReply(twitterAPI: TwitterAPI, _zassyokuID: Long, _zassyokuRatio: I
     }
 
     val level = user.gainExp(expReply)
-    if (level._2 < level._1) {
-      val reply = "@" + user.screenName + " " + "レベルアップ！" + level._1 + "→" + level._2 + " 次のレベルまであと" + user.nextLevelUpExp + "exp"
-      twitterAPI.postReply(reply)
+    if (level._1 < level._2) {
+      val reply = "@" + mention.getUser.getScreenName + " " + "レベルアップ！" + level._1 + "→" + level._2 + " 次のレベルまであと" + user.nextLevelUpExp + "exp"
+      twitterAPI.postReply(reply, mention.getId)
     }
-    
+        
     userManager.update(user)
 
   }

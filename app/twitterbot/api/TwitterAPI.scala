@@ -139,12 +139,10 @@ class TwitterAPI(_twitter: Twitter, _updator: TwitterUpdator) {
    * inReplyToStatusIdに返事先のツイートIDを指定します<br>
    * isDuplicateをtrueにするとランダムな数字を付与します
    */
-  def postReply(reply: String, inReplyToStatusId: Long = -1L, isDuplicate: Boolean = false) = {
+  def postReply(reply: String, inReplyToStatusId: Long, isDuplicate: Boolean = false) = {
     val postReply = if (isDuplicate) reply + " " + random.nextInt(100) else reply
     val statusUpdate = new StatusUpdate(postReply)
-    if(inReplyToStatusId > 0){
-      statusUpdate.setInReplyToStatusId(inReplyToStatusId)
-    }
+    statusUpdate.setInReplyToStatusId(inReplyToStatusId)
     twitter.updateStatus(statusUpdate)
     updator.updateLastReplyID(inReplyToStatusId)
   }
