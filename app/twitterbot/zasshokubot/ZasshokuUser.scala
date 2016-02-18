@@ -2,14 +2,19 @@ package twitterbot.zasshokubot
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import twitterbot.api.BotFactory
+import twitter4j.TwitterException
+import twitterbot.api.TwitterError
 
 case class ZasshokuUser(_userID: Long, _screenName: String, _isProtected: Boolean, _totalExp: Int = 0) {
   val userID = _userID
   var screenName = _screenName
   var isProtected = _isProtected
   var level = 1
-  var totalExp = _totalExp
-  private var nextLevelUpTotalExp = ZasshokuUser.calcNextLevelUpTotalExp(level)
+  var totalExp = 0
+  var nextLevelUpTotalExp = ZasshokuUser.calcNextLevelUpTotalExp(level)
+  gainExp(_totalExp)
+  
 
   def gainExp(gainedExp: Int) = {
     totalExp += gainedExp
@@ -34,6 +39,7 @@ case class ZasshokuUser(_userID: Long, _screenName: String, _isProtected: Boolea
 }
 
 object ZasshokuUser {
+
   private def calcNextLevelUpTotalExp(level: Int): Int = {
     var returnExp = 0
     for (n: Int <- Range(1, level + 1)) {
@@ -48,6 +54,6 @@ object ZasshokuUser {
     val screenName = array(1)
     val isProtected = java.lang.Boolean.parseBoolean(array(2))
     val totalExp = java.lang.Integer.parseInt(array(3))
-    new ZasshokuUser(userID, screenName, isProtected, totalExp)
+    return new ZasshokuUser(userID, screenName, isProtected, totalExp)
   }
 }

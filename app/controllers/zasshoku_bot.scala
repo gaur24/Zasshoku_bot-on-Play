@@ -52,7 +52,7 @@ class zasshoku_bot @Inject() (val messagesApi: MessagesApi) extends Controller w
   }
 
   def zasshokuRanking = Action {
-    Ok(views.html.zasshokuRank(botName, zasshokuBot.users.sortBy(_.totalExp).reverse))
+    Ok(views.html.zasshokuRank(botName, zasshokuBot.users.filterNot(_.isProtected).sortBy(_.totalExp).reverse))
   }
 
   def log = Action {

@@ -22,10 +22,6 @@ class ZasshokuReply(twitterAPI: TwitterAPI, _zassyokuID: Long, _zassyokuRatio: I
   override def makeReply(mention: Status): Option[String] = {
     val user = mention.getUser
 
-    if (user.getScreenName == twitterAPI.screenName) {
-      return None
-    }
-
     // 鍵付きユーザーのツイートは拾わない
     var homeTimeline = twitterAPI.homeTimeline(200).toSeq.filterNot(_.getUser.isProtected)
     
@@ -34,7 +30,8 @@ class ZasshokuReply(twitterAPI: TwitterAPI, _zassyokuID: Long, _zassyokuRatio: I
     }
 
     // 大体の文字数をランダムに決める
-    val sentenceLimit = random.nextInt(TwitterAPI.tweetLengthMax)
+    // あまり長いのはつぶやかないような確率分布
+    val sentenceLimit = random.nextInt(random.nextInt(TwitterAPI.tweetLengthMax - 1)) + 1
     
     var reply = MarkovController.generateSentence(homeTimeline, twitterAPI.screenName, sentenceLimit, responseTime)
 
@@ -65,8 +62,8 @@ class ZasshokuReply(twitterAPI: TwitterAPI, _zassyokuID: Long, _zassyokuRatio: I
 
     val level = user.gainExp(expReply)
     if (level._1 < level._2) {
-      val reply = "@" + mention.getUser.getScreenName + " " + "レベルアップ！" + level._1 + "→" + level._2 + " 次のレベルまであと" + user.nextLevelUpExp + "exp"
-      twitterAPI.postReply(reply, mention.getId)
+      val reply = Some("@" + mention.getUser.getScreenName + " " + "レベルアップ！" + level._1 + "→" + level._2 + " 次のレベルまであと" + user.nextLevelUpExp + "exp")
+      twitterAPI.postReply(reply, mention.getId, false)
     }
         
     userManager.update(user)

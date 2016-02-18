@@ -12,72 +12,47 @@ abstract class PeriodicReplyTask(twitterAPI: TwitterAPI, _replyCount: Int, _repl
 
   private val replyCount = _replyCount
   private val replyLimit = _replyLimit
-  private var isDuplicate = false
-  private var replyCountMap = HashMap[Long, Int]()
+  private val replyCountMap = HashMap[Long, Int]()
 
   def makeReply(mention: Status): Option[String]
 
   def postProcessingOfSuccess(mention: Status)
 
   override def periodic = {
-    var removeUserIDs = HashSet[Long]()
-    var updateUserIDs = HashSet[Long]()
 
-    // ややこしいことするのでcatchしてまた投げます
-    try {
+    val limitedUserIDs = replyCountMap.filter(p => p._2 >= replyLimit).keySet
+    val updateUserIDs = HashSet[Long]()
 
-      // statusIDの古い順に並べる
-      val mentions = twitterAPI.mentions(replyCount)
-        .filterNot { x => x.getUser.getScreenName == twitterAPI.screenName }
-        .reverse
+    // statusIDの古い順に並べる
+    val mentions = twitterAPI.mentions(replyCount)
+      .filterNot(_.getUser.getScreenName == twitterAPI.screenName)
+      .reverse
 
-      for (mention <- mentions) {
+    for (mention <- mentions) {
 
-        val replyCount = replyCountMap.getOrElse(mention.getUser.getId, 0)
+      val optionReply = this.makeReply(mention).map("@" + mention.getUser.getScreenName + " " + _)
 
-        // リプライ連続回数の上限を超えてなければ
-        if (replyCount < replyLimit) {
-          val createdReply = this.makeReply(mention)
-          // makeReplyされたら返事をする
-          if (createdReply.isDefined) {
-            val reply = "@" + mention.getUser.getScreenName + " " + createdReply.get
-            twitterAPI.postReply(reply, mention.getId, isDuplicate)
+      // リプライが生成されないまたは上限に達したユーザーは返事をしない
+      if (optionReply.isEmpty || limitedUserIDs.contains(mention.getUser.getId)) {
+        println("not reply -> " + mention.getText)
+        twitterAPI.postReply(None, mention.getId, false)
+      } else {
+        println("reply -> " + mention.getText)
+        twitterAPI.postReply(optionReply, mention.getId, false)
 
-            postProcessingOfSuccess(mention)
+        postProcessingOfSuccess(mention)
 
-            isDuplicate = false
-            removeUserIDs.remove(mention.getUser.getId)
-            updateUserIDs += mention.getUser.getId
-            replyCountMap.put(mention.getUser.getId, replyCount + 1)
-          }
+        // 更新
+        replyCountMap.put(mention.getUser.getId, replyCountMap.get(mention.getUser.getId).getOrElse(0) + 1)
 
-          // 上限を超えたまたはmakeReplyされないので返事をしない
-        } else {
-          twitterAPI.doNotReplyToThisTweet(mention.getId)
-          removeUserIDs += mention.getUser.getId
-        }
+        // 更新したかどうかを覚えておく
+        updateUserIDs.add(mention.getUser.getId)
       }
-    } catch {
-      case e: TwitterException =>
-        if (e.getErrorCode == TwitterError.duplicateStatus) {
-          isDuplicate = true
-          throw new TwitterException(e)
-        } else {
-          throw new TwitterException(e)
-        }
-      case e: Exception =>
-        throw new Exception(e)
-      case e: Throwable =>
-        throw new Throwable(e)
-    } finally {
-      // 必ず最後に更新処理
-      removeUserIDs.foreach { x => replyCountMap.remove(x) }
-      for (id <- replyCountMap.keySet) {
-        if (!updateUserIDs.contains(id)) {
-          replyCountMap.remove(id)
-        }
-      }
+
     }
+
+    // 回数を増やしたユーザーは連続して返事をしているので上限チェック対象
+    replyCountMap.retain((k, v) => updateUserIDs.contains(k))
 
   }
 }

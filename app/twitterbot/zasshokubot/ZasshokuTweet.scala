@@ -21,7 +21,8 @@ class ZasshokuTweet(twitterAPI: TwitterAPI, _zassyokuID: Long, _zassyokuRatio: I
     }
     
     // 大体の文字数をランダムに決める
-    val sentenceLimit = random.nextInt(TwitterAPI.tweetLengthMax)
+    // あまり長いのはつぶやかないような確率分布
+    val sentenceLimit = random.nextInt(random.nextInt(TwitterAPI.tweetLengthMax - 1)) + 1
     
     var tweet = MarkovController.generateSentence(homeTimeline.seq, twitterAPI.screenName, sentenceLimit, responseTime)
 

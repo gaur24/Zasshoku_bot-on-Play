@@ -2,7 +2,6 @@ package twitterbot.api
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.util.Random
-
 import twitter4j.Paging
 import twitter4j.ResponseList
 import twitter4j.Status
@@ -10,6 +9,7 @@ import twitter4j.StatusUpdate
 import twitter4j.Twitter
 import twitter4j.TwitterException
 import twitter4j.User
+import org.slf4j.LoggerFactory
 
 /**
  * Twitterクラスのラッパークラス
@@ -20,6 +20,7 @@ class TwitterAPI(_twitter: Twitter, _updator: TwitterUpdator) {
   private val random = new Random
   var screenName = twitter.getScreenName
   initAPI()
+  private val logger = LoggerFactory.getLogger(getClass)
 
   private def initAPI() = {
     val latestStatusID = twitter.getHomeTimeline(new Paging(1, 1)).get(0).getId
@@ -125,6 +126,7 @@ class TwitterAPI(_twitter: Twitter, _updator: TwitterUpdator) {
    */
   def postTweet(s: String) = {
     twitter.updateStatus(s)
+    logger.info(s)
   }
 
   /**
@@ -136,14 +138,18 @@ class TwitterAPI(_twitter: Twitter, _updator: TwitterUpdator) {
 
   /**
    * 返事をします<br>
+   * つぶやきがNoneであれば返事をしません<br>
    * inReplyToStatusIdに返事先のツイートIDを指定します<br>
    * isDuplicateをtrueにするとランダムな数字を付与します
    */
-  def postReply(reply: String, inReplyToStatusId: Long, isDuplicate: Boolean = false) = {
-    val postReply = if (isDuplicate) reply + " " + random.nextInt(100) else reply
-    val statusUpdate = new StatusUpdate(postReply)
-    statusUpdate.setInReplyToStatusId(inReplyToStatusId)
-    twitter.updateStatus(statusUpdate)
+  def postReply(optionReply: Option[String], inReplyToStatusId: Long, isDuplicate: Boolean) = {
+    if (optionReply.isDefined) {
+      val postReply = if (isDuplicate) optionReply.get + " " + random.nextInt(100) else optionReply.get
+      val statusUpdate = new StatusUpdate(postReply)
+      statusUpdate.setInReplyToStatusId(inReplyToStatusId)
+      twitter.updateStatus(statusUpdate)
+      logger.info(postReply)
+    }
     updator.updateLastReplyID(inReplyToStatusId)
   }
 
